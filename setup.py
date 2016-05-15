@@ -102,31 +102,23 @@ class install_cexe(Command):
         return self.outfiles
 
 
-command_overrides = {
-    'sdist': sdist,
-    'fetch_sources': fetch_sources,
-    'build': build,
-    'build_s6': build_s6,
-    'install': install,
-    'install_cexe': install_cexe,
-}
-
-
-def wheel_support():
-    class bdist_wheel(orig_bdist_wheel):
-        def get_tag(self):
-            python, abi, plat = orig_bdist_wheel.get_tag(self)
-            python = 'py2.py3'  # python is irrelevant to our pure-C package
-            return python, abi, plat
-
-    command_overrides['bdist_wheel'] = bdist_wheel
-
 try:
-    from wheel.bdist_wheel import bdist_wheel as orig_bdist_wheel
+    from wheel.bdist_wheel import bdist_wheel as _bdist_wheel
+
+    class bdist_wheel(_bdist_wheel):
+
+        def finalize_options(self):
+            _bdist_wheel.finalize_options(self)
+            # Mark us as not a pure python package
+            self.root_is_pure = False
+
+        def get_tag(self):
+            python, abi, plat = _bdist_wheel.get_tag(self)
+            # We don't contain any python source
+            python, abi = 'py2.py3', 'none'
+            return python, abi, plat
 except ImportError:
-    pass
-else:
-    wheel_support()
+    bdist_wheel = None
 
 
 import versions
@@ -139,7 +131,15 @@ version += versions.suffix
 setup(
     name='s6',
     version=version,
-    cmdclass=command_overrides,
+    cmdclass={
+        'sdist': sdist,
+        'bdist_wheel': bdist_wheel,
+        'fetch_sources': fetch_sources,
+        'build': build,
+        'build_s6': build_s6,
+        'install': install,
+        'install_cexe': install_cexe,
+    },
     platforms=['linux'],
     classifiers=[
         'License :: OSI Approved :: MIT License',
