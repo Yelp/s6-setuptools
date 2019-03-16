@@ -12,7 +12,7 @@ url(){
 skalibs=$(url skalibs $skalibs_version)
 execline=$(url execline $execline_version)
 s6=$(url s6 $s6_version)
-make=http://ftp.gnu.org/gnu/make/make-4.1.tar.gz
+make=http://ftp.gnu.org/gnu/make/make-4.2.1.tar.gz
 
 set -x
 
