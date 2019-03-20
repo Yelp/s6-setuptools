@@ -36,9 +36,6 @@ build() {
     make install
 }
 
-set -x
-cd $(untar make)
-./configure && make
 export PATH="$TOP/vendor/make:$PATH"
 
 build skalibs
