@@ -36,8 +36,6 @@ build() {
     make install
 }
 
-export PATH="$TOP/vendor/make:$PATH"
-
 build skalibs
 build execline
 build s6
